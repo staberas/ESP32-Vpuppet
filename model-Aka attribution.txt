@@ -1,0 +1,3 @@
+Source: https://github.com/Inochi2D/example-models
+Design: seagetch - https://twitter.com/seagetch
+Rigging: seagetch - https://twitter.com/seagetch

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pure JavaScript Example</title>
+</head>
+<body>
+  <div>
+    <label for="numPoints">Number of points:</label>
+    <input type="number" id="numPoints" value="4">
+  </div>
+  <div>
+    <label for="lineWidth">Line width:</label>
+    <input type="number" id="lineWidth" value="7">
+  </div>
+  <div>
+    <label for="lineColor">Line color:</label>
+    <input type="color" id="lineColor" value="#FEE8D4">
+  </div>
+  <button id="start">Start</button>
+  <canvas id="myCanvas" width="400" height="400"></canvas>
+
+  <script>
+    var canvas = document.getElementById("myCanvas");
+    var ctx = canvas.getContext("2d");
+
+    var image = new Image();
+    var numPoints = document.getElementById("numPoints").value;
+    var lineWidth = document.getElementById("lineWidth").value;
+    var lineColor = document.getElementById("lineColor").value;
+    var clickCount = 0;
+    var points = [];
+    var started = false;
+
+    image.onload = function() {
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    }
+    image.src = "body-top-layer.png";
+
+    document.getElementById("numPoints").addEventListener('change', function() {
+      numPoints = this.value;
+    });
+
+    document.getElementById("lineWidth").addEventListener('change', function() {
+      lineWidth = this.value;
+    });
+
+    document.getElementById("lineColor").addEventListener('change', function() {
+      lineColor = this.value;
+    });
+
+    document.getElementById("start").addEventListener('click', function() {
+      if (!started) {
+        started = true;
+        canvas.addEventListener('click', handleClick);
+      }
+    });
+
+    function handleClick(event) {
+      var rect = canvas.getBoundingClientRect();
+      var x = event.clientX - rect.left;
+      var y = event.clientY - rect.top;
+      points.push({x: x, y: y});
+      clickCount++;
+
+      if (clickCount == numPoints) {
+        alert('done');
+        canvas.removeEventListener('click', handleClick);
+        drawLine();
+        downloadData();
+        started = false;
+        clickCount = 0;
+        points = [];
+      }
+    }
+
+    function drawLine() {
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+
+      for (var i = 1; i < numPoints; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = lineColor;
+      ctx.stroke();
+    }
+
+    function downloadData() {
+      var data = {
+        points: points,
+        lineWidth: lineWidth,
+        lineColor: lineColor
+      };
+      var jsonData = JSON.stringify(data);
+      var a = document.createElement('a');
+      var file = new Blob([jsonData], {type: 'application/json'});
+      a.href = URL.createObjectURL(file);
+      a.download = 'line-data.json';
+      a.click();
+    }
+  </script>
+</body>
+</html>

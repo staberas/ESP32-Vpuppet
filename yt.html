@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Canvas Eyes</title>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+
+    <script>
+      window.onload = function() {
+        const canvas = document.getElementById('canvas');
+        canvas.width = 400;
+        canvas.height = 400;
+        const ctx = canvas.getContext('2d');
+
+        // Create new image elements with desired dimensions
+        const imageBase = new Image();
+        const imageEyes = new Image();
+        const imageTopLayer = new Image();
+        imageBase.width = canvas.width;
+        imageBase.height = canvas.height;
+        imageEyes.width = canvas.width;
+        imageEyes.height = canvas.height;
+        imageTopLayer.width = canvas.width;
+        imageTopLayer.height = canvas.height;
+
+        // Load images after the page has loaded
+        imageBase.onload = function() {
+          imageEyes.onload = function() {
+            imageTopLayer.onload = function() {
+              drawImages();
+            };
+            imageTopLayer.src = 'body-top-layer.png';
+          };
+          imageEyes.src = 'Aka-eyes.png';
+        };
+        imageBase.src = 'body1.png';
+
+        // Draw images onto canvas
+        function drawImages() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(imageBase, 0, 0, canvas.width, canvas.height);
+          const eyesWidth = canvas.width;
+          const eyesHeight = canvas.height;
+          const eyesXOffset = 0;
+          const eyesYOffset = 0;
+          const eyesSmoothingFactor = 0.2;
+          let eyesX = canvas.width / 2;
+          let eyesY = canvas.height / 2;
+          let lastEyesX = eyesX;
+          let lastEyesY = eyesY;
+
+          // Set initial position for eyes
+          ctx.drawImage(imageBase, 0, 0, canvas.width, canvas.height);
+          ctx.drawImage(imageEyes, eyesX, eyesY, eyesWidth, eyesHeight);
+          ctx.drawImage(imageTopLayer, 0, 0, canvas.width, canvas.height);
+          
+          //canvas.addEventListener('mousemove', function(e) {
+          document.body.addEventListener('mousemove', function(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const xOffset = Math.max(-2, Math.min(2, x - canvas.width / 2));
+            const yOffset = Math.max(-2, Math.min(2, y - canvas.height / 2));
+            lastEyesX = eyesX;
+            lastEyesY = eyesY;
+            eyesX += (xOffset - eyesXOffset - eyesX) * eyesSmoothingFactor;
+            eyesY += (yOffset - eyesYOffset - eyesY) * eyesSmoothingFactor;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(imageBase, 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(imageEyes, eyesX, eyesY, eyesWidth, eyesHeight);
+            ctx.drawImage(imageTopLayer, 0, 0, canvas.width, canvas.height);
+          });
+          document.body.addEventListener('touchmove', function(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.touches[0].clientX - rect.left;
+            const y = e.touches[0].clientY - rect.top;
+            const xOffset = Math.max(-2, Math.min(2, x - canvas.width / 2));
+            const yOffset = Math.max(-2, Math.min(2, y - canvas.height / 2));
+            lastEyesX = eyesX; 
+            lastEyesY = eyesY;
+            eyesX += (xOffset - eyesXOffset - eyesX) * eyesSmoothingFactor;
+            eyesY += (yOffset - eyesYOffset - eyesY) * eyesSmoothingFactor;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(imageBase, 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(imageEyes, eyesX, eyesY, eyesWidth, eyesHeight);
+            ctx.drawImage(imageTopLayer, 0, 0, canvas.width, canvas.height);
+          });       
+          
+        }
+      };
+    </script>
+  </body>
+</html>

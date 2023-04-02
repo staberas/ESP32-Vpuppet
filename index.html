@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Canvas Eyes</title>
+  </head>
+  <body>
+    <canvas id="canvas" width="400" height="400"></canvas>
+
+    <script>
+  // Set up mouth animation variables
+let mouthPoints = [];
+/*const jsq = '{"points":[{"x":189.84375,"y":193},{"x":194.84375,"y":196},{"x":198.84375,"y":196},{"x":204.84375,"y":195},{"x":209.84375,"y":193},{"x":199.84375,"y":190}],"lineWidth":"9","lineColor":"#fee8d4"}';
+const mouthPoints = JSON.parse(jsq);
+*/
+let showMouth = false;
+const jsonMouth = "/js/line-data.json";
+
+/* */   
+ 
+async function updateTable() {
+  const response = await fetch("/sensors");
+  const data = await response.json();
+
+  document.getElementById("aqi").textContent = data.AQI;
+  document.getElementById("tvoc").textContent = data.TVOC + "ppb";
+  document.getElementById("co2").textContent = data.CO2 + "ppm";
+  document.getElementById("temp").textContent = data.TEMP + " °C";
+  document.getElementById("press").textContent = data.PRESS + "Pa";
+  document.getElementById("alt").textContent = data.ALT;
+
+  setTimeout(updateTable, 1000);
+}
+
+window.onload = function () {
+
+  fetch(jsonMouth)
+      .then((response) => response.json())
+      .then((response) => mouthPoints=response);
+    
+  updateTable();
+
+  const t = document.getElementById('canvas');
+  const e = t.getContext("2d");
+
+  // Load the image
+  // Create images to be used
+  const imageBase = new Image();
+  const imageEyes = new Image();
+  const imageTopLayer = new Image();
+
+
+/*  */
+  const eyesWidth = t.width;
+  const eyesHeight = t.height;
+  const eyesXOffset = 0;
+  const eyesYOffset = 0;
+  const eyesSmoothingFactor = 0.2;
+  let eyesX = 2  //t.width / 2;
+  let eyesY = -1  //t.height / 2;
+  let lastEyesX = eyesX;
+  let lastEyesY = eyesY;
+  
+//dont forget to add /images/ on links
+  imageTopLayer.src = "body-top-layer.png";
+  imageEyes.src = "Aka-eyes.png";
+  imageBase.src = "body1.png";
+
+  // Once the image is loaded, set the canvas size to match the image size
+  imageBase.onload = () => {
+    t.width = imageBase.width;
+    t.height = imageBase.height;
+
+    // Draw the image onto the canvas
+    e.drawImage(imageBase, 0, 0);
+    e.drawImage(imageEyes, 2, -1);
+
+    // Create an animation loop
+    const deformAmount = 1.7; // adjust this to control the amount of deformation
+    let time = 0;
+    const animate = () => {
+
+      requestAnimationFrame(animate);
+
+      // Clear the canvas
+      e.clearRect(0, 0, t.width, t.height);
+      //e.font = "30px Arial";
+      //e.fillText("Hello World", 50, 50);
+      // Deform the image vertically
+      const deformation = Math.sin(time * 5) * deformAmount;
+      e.drawImage(imageBase, 0, deformation, t.width, t.height - deformation, 0, 0, t.width, t.height);
+      e.drawImage(imageEyes, lastEyesX, lastEyesY-deformation, t.width, t.height);
+      e.drawImage(imageTopLayer, 0, deformation, t.width, t.height - deformation, 0, 0, t.width, t.height);
+
+      // Draw the mouth if showMouth is true
+      if (showMouth) {
+        e.beginPath();
+        //console.log('mouth');
+        e.lineWidth = parseInt(mouthPoints.lineWidth);
+        e.strokeStyle = mouthPoints.lineColor;
+        //e.moveTo(mouthPoints[0].x, mouthPoints[0].y - deformation);
+        e.moveTo(mouthPoints.points[0].x-50, (mouthPoints.points[0].y-50) - deformation);
+        for (let i = 1; i < mouthPoints.points.length; i++) {
+          e.lineTo(mouthPoints.points[i].x-50, mouthPoints.points[i].y-50 - deformation);
+        }
+        e.stroke();
+      }
+
+      // Increment the time for the next frame
+      time += 0.01;
+    };
+    animate();
+    
+  };
+
+    document.body.addEventListener('mousemove', function(p) {
+    const rect = t.getBoundingClientRect();
+    const x = p.clientX - rect.left;
+    const y = p.clientY - rect.top;
+    const xOffset = Math.max(-2, Math.min(2, x - canvas.width / 2));
+    const yOffset = Math.max(-2, Math.min(2, y - canvas.height / 2));
+    lastEyesX = eyesX;
+    lastEyesY = eyesY;
+    eyesX += (xOffset - eyesXOffset - eyesX) * eyesSmoothingFactor;
+    eyesY += (yOffset - eyesYOffset - eyesY) * eyesSmoothingFactor;
+    //ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //ctx.drawImage(imageBase, 0, 0, canvas.width, canvas.height);
+    e.drawImage(imageEyes, eyesX, eyesY, eyesWidth, eyesHeight);
+    //ctx.drawImage(imageTopLayer, 0, 0, canvas.width, canvas.height);
+    // Add the canvas to the page
+
+  });
+    document.body.addEventListener('touchmove', function(p) {
+    const rect = t.getBoundingClientRect();
+    const x = p.touches[0].clientX - rect.left;
+    const y = p.touches[0].clientY - rect.top;
+    const xOffset = Math.max(-2, Math.min(2, x - canvas.width / 2));
+    const yOffset = Math.max(-2, Math.min(2, y - canvas.height / 2));
+    lastEyesX = eyesX;
+    lastEyesY = eyesY;
+    eyesX += (xOffset - eyesXOffset - eyesX) * eyesSmoothingFactor;
+    eyesY += (yOffset - eyesYOffset - eyesY) * eyesSmoothingFactor;
+    //ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //ctx.drawImage(imageBase, 0, 0, canvas.width, canvas.height);
+    e.drawImage(imageEyes, eyesX, eyesY, eyesWidth, eyesHeight);
+
+    //ctx.drawImage(imageTopLayer, 0, 0, canvas.width, canvas.height);
+    // Add the canvas to the page
+
+  });
+    document.body.appendChild(t);
+};
+
+    </script>
+  </body>
+</html>

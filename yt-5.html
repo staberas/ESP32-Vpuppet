@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Donut with Image Texture</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+</head>
+<body>
+	<script>
+/*		let img;
+
+		function preload() {
+			img = loadImage('https://imgtr.ee/images/2023/03/31/UT647.png');
+		}
+
+		function setup() {
+			createCanvas(400, 400, WEBGL);
+            noStroke();
+
+		}
+
+
+		function draw() {
+    		background(220);
+		  translate(0, 0, 0);
+		  texture(img);
+		  push();
+		  rotateZ(frameCount * 0.01);
+		  rotateX(frameCount * 0.01);
+		  rotateY(frameCount * 0.01);
+		  plane(120);
+		  pop();
+		}
+
+	
+*/
+		let cols, rows;
+		let scl = 20;
+		let w = 1400;
+		let h = 1000;
+
+		let flying = 0;
+
+		let terrain = [];
+
+		let textureImg;
+
+		function preload() {
+			textureImg = loadImage('https://imgtr.ee/images/2023/03/31/UT647.png');
+		}
+
+		function setup() {
+			createCanvas(800, 600, WEBGL);
+			cols = w / scl;
+			rows = h / scl;
+
+			// initialize terrain array
+			for (let i = 0; i < cols; i++) {
+				terrain[i] = [];
+				for (let j = 0; j < rows; j++) {
+					terrain[i][j] = 0;
+				}
+			}
+
+			texture(textureImg);
+		}
+
+		function draw() {
+			background(135, 206, 235);
+
+			translate(0, 50);
+			rotateX(PI / 3);
+
+			flying -= 0.1;
+
+			let yoff = flying;
+			for (let y = 0; y < rows; y++) {
+				let xoff = 0;
+				for (let x = 0; x < cols; x++) {
+					terrain[x][y] = map(noise(xoff, yoff), 0, 1, -100, 100);
+					xoff += 0.2;
+				}
+				yoff += 0.2;
+			}
+
+			translate(-w / 2, -h / 2);
+
+			for (let y = 0; y < rows - 1; y++) {
+				beginShape(TRIANGLE_STRIP);
+				for (let x = 0; x < cols; x++) {
+					texture(textureImg);
+					vertex(x * scl, y * scl, terrain[x][y], x, y);
+					texture(textureImg);
+					vertex(x * scl, (y + 1) * scl, terrain[x][y + 1], x, y + 1);
+				}
+				endShape();
+			}
+		}
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Deforming a 3D Mesh with Texture Mapping in Canvas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js" integrity="sha512-3RlxD1bW34eFKPwj9gUXEWtdSMC59QqIqHnD8O/NoTwSJhgxRizdcFVQhUMFyTp5RwLTDL0Lbcqtl8b7bFAzog==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  </head>
+  <body>
+    <script>
+let img;
+let t = 0;
+
+function preload() {
+  img = loadImage('https://imgtr.ee/images/2023/03/31/UT647.png');
+}
+
+function setup() {
+  createCanvas(200, 200, WEBGL);
+  describe('quad with a texture, mapped using normalized coordinates');
+}
+
+function draw() {
+  background(0);
+  texture(img);
+  textureMode(NORMAL);
+
+  let vertices = [];
+  for (let x = -40; x <= 40; x += 10) {
+    let y = map(sin(t + x * 0.05), -1, 1, -40, 40);
+    let z = map(sin(t + x * 0.1), -1, 1, -20, 20);
+    vertices.push(createVector(x, y, z));
+  }
+
+  beginShape();
+  for (let i = 0; i < vertices.length; i++) {
+    let v = vertices[i];
+    let u = map(v.x, -40, 40, 0, 1);
+    let vTex = map(v.y, -40, 40, 0, 1);
+    vertex(v.x, v.y, v.z, u, vTex);
+  }
+  endShape(CLOSE);
+
+  t += 0.1;
+}
+
+/*
+function draw() {
+  background(0);
+  texture(img);
+  textureMode(NORMAL);
+  beginShape();
+  vertex(-40, -40, 0, 0);
+  vertex(40, -40, 1, 0);
+  vertex(40, 40, 1, 1);
+  vertex(-40, 40, 0, 1);
+  endShape();
+}*/
+
+</script>
+</body>
+</html>
+
